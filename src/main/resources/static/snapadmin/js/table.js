@@ -6,9 +6,9 @@ function updateBulkActions(table, selected) {
 		if (deleteEnabled === "true") {
 			div.innerHTML = `${selected} items selected 
 				<input type="submit" form="multi-delete-form" 
-					class="ui-btn btn btn-secondary ${deleteEnabled === "false" ? 'disable' : ''} " value="Delete">`;
+					class="ui-btn btn btn-secondary ${deleteEnabled === "false" ? 'disable' : ''} " value="Delete" />`;
 		} else {
-			
+
 			div.innerHTML = `<p class=" badge bg-secondary text-white m-0 mt-2">DELETE not allowed on this table</p>`;
 		}
 	});
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				alert('No items selected');
 				return;
 			}
-			
+
 			if (!confirm('Are you sure you want to delete these items?')) {
 				e.preventDefault();
 			}
@@ -74,10 +74,31 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 	
 	if (document.querySelector("div.table-selectable select.page-size") != null) {
-		document.querySelector("div.table-selectable select.page-size").addEventListener('change', function(e) {
-			this.parentElement.querySelector("input[name=\"pageSize\"]").value = e.target.value;
-			this.parentElement.submit();
-		});
+		document.querySelectorAll("div.table-selectable select.page-size").forEach(e => {
+            e.addEventListener('change', function(e) {
+                this.parentElement.querySelector("input[name=\"pageSize\"]").value = e.target.value;
+
+                const params = new URLSearchParams(window.location.search);
+
+                if (params.get('sortKey') != null) {
+                    var input = document.createElement('input');
+                    input.setAttribute('name', 'sortKey');
+                    input.setAttribute('value', params.get('sortKey'));
+                    input.setAttribute('type', 'hidden');
+                    this.parentElement.appendChild(input);
+                }
+
+                if (params.get('sortOrder') != null) {
+                    var input = document.createElement('input');
+                    input.setAttribute('name', 'sortOrder');
+                    input.setAttribute('value', params.get('sortOrder'));
+                    input.setAttribute('type', 'hidden');
+                    this.parentElement.appendChild(input);
+                }
+
+                this.parentElement.submit();
+		    });
+        });
 	}
 	
 });

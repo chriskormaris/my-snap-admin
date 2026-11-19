@@ -8,7 +8,6 @@
 				autocomplete="off"
 				th:value="${value}"
 				placeholder="NULL">
-			</input>
 			<div class="suggestions d-none">
 			</div>
 		</div>
@@ -20,7 +19,6 @@
 					th:name="|${field.getName()}[]|"
 					th:data-fieldname="|${field.getName()}[]|"
 					th:data-classname="${field.getConnectedType().getName()}">
-				</input>
 				<div class="suggestions d-none">
 				</div>
 			</div>
@@ -70,7 +68,7 @@
 							<input type="hidden" name="filter_field" th:value="${field.getJavaName()}">
 	
 							<th:block th:if="${field.isForeignKey()}">
-								<span class="input-group-text w-25">
+								<span class="input-group-text" style="width: 35%">
 									<input type="hidden" name="filter_op" value="string_eq">
 									Equals
 								</span>
@@ -79,14 +77,13 @@
 										th:data-classname="${field.getConnectedType().getName()}"
 										autocomplete="off"
 										placeholder="NULL">
-									</input>
 									<div class="suggestions d-none">
 									</div>
 								</div>
 								
 							</th:block>
 							<th:block th:unless="${field.isForeignKey()}">
-								<select class="form-select w-25" name="filter_op">
+								<select class="form-select" style="width: 35%" name="filter_op">
 									<option th:value="${op}" th:each="op : ${field.getType().getCompareOperators()}" 
 										th:text="${op.getDisplayName()}">
 								</select>
@@ -96,7 +93,7 @@
 											create=${create}, 
 											name='filter_value',
 											value=''
-										)}"></input>
+										)}">
 							</th:block>
 							<button class="ui-btn btn btn-primary"><i class="bi bi-search text-white"></i></button>
 						</div>

@@ -1,15 +1,11 @@
-/* 
+/*
  * SnapAdmin - An automatically generated CRUD admin UI for Spring Boot apps
  * Copyright (C) 2023 Ailef (http://ailef.tech)
- * 
+ *
 
  */
 
 package tech.ailef.snapadmin.external;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +14,11 @@ import org.springframework.boot.web.servlet.context.ServletWebServerInitializedE
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import tech.ailef.snapadmin.external.exceptions.SnapAdminException;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Runs at startup to determine if SnapAdmin is protected with authentication.
@@ -28,39 +27,39 @@ import tech.ailef.snapadmin.external.exceptions.SnapAdminException;
  */
 @Configuration
 public class StartupAuthCheckRunner {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(StartupAuthCheckRunner.class);
-	
+
 	@Autowired
 	private SnapAdmin snapAdmin;
 
 	@Autowired
 	private SnapAdminProperties properties;
-	
+
 	/**
 	 * This event listener gets called after the server is initialized in order
 	 * to have access to the value of the port (needed to build the URL at runtime).
 	 * The method checks if SnapAdmin is accessible (status code == 200) to determine
 	 * whether security is enabled, and if this is not the case it sets flags
-	 * to display appropriate warnings. 
+	 * to display appropriate warnings.
 	 * @return
 	 */
 	@Bean
 	ApplicationListener<ServletWebServerInitializedEvent> serverPortListenerBean() {
 		return event -> {
 			int serverPort = event.getWebServer().getPort();
-			
-			String link = "http://localhost:" + serverPort + "/" + properties.getBaseUrl();
+
+			String link = "http://localhost:" + serverPort + "/" + properties.getBaseUrl() + "/";
 			logger.info("Checking if SnapAdmin is protected with authentication at " + link);
-			
+
 			try {
 				URL url = new URL(link);
-				
+
 				HttpURLConnection openConnection = (HttpURLConnection)url.openConnection();
 				openConnection.setInstanceFollowRedirects(false);
 				int statusCode = openConnection.getResponseCode();
-				
-				snapAdmin.setAuthenticated(statusCode != 200);
+
+                snapAdmin.setAuthenticated(statusCode != 200);
 				if (statusCode == 200) {
 					logger.warn("It appears that you have not enabled security so SnapAdmin is publicly accessible. "
 							+ "Read here to learn how to secure SnapAdmin with Spring Security: https://www.snapadmin.dev/docs/#security");
@@ -69,7 +68,8 @@ public class StartupAuthCheckRunner {
 			} catch (IOException e) {
 				throw new SnapAdminException(e);
 			}
-			
+
 		};
 	}
+
 }

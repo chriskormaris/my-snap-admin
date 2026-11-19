@@ -1,0 +1,13 @@
+ldap:
+  server:
+    urls:
+      - ldap://__LDAP_SERVER_IP_ADDRESS_1__
+      - ldap://__LDAP_SERVER_IP_ADDRESS_2__
+      - ldap://__LDAP_SERVER_IP_ADDRESS_3__
+
+snapadmin:
+  admins:
+    - alice
+    - bob
+  whitelisted-users:
+    - charlie

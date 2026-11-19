@@ -7,10 +7,10 @@
 			<nav th:replace="~{snapadmin/fragments/resources :: navbar}"></nav>
 		    <div class="d-flex">
 		    	<div th:replace="~{snapadmin/fragments/resources :: sidebar('logs')}"></div>
-		    	<div class="main-content bg-lighter">
+		    	<div class="main-content bg-lighter main-content-expanded">
 		    		<th:block th:replace="~{snapadmin/fragments/resources :: alerts}"></th:block>
 					<h1 class="fw-bold mb-4"><i class="align-middle bi bi-gear"></i>
-						<span class="align-middle">Logs</span> 
+						<span class="align-middle">Logs</span>
 					</h1>
 		    		<div class="row mt-4">
 		    			<div class="col">
@@ -69,7 +69,7 @@
 			    										<th:block th:replace="~{snapadmin/fragments/table_selectable :: 
 			    											sort_arrow(sortKey=${searchRequest.getSortKey()},
 			    											sortOrder=${searchRequest.getSortOrder()},
-			    											fieldName='actionType')}">
+			    											fieldName='actionType')}"/>
 			    									</h4>
 			    								</div>
 		    								</th>
@@ -80,7 +80,7 @@
 			    										<th:block th:replace="~{snapadmin/fragments/table_selectable :: 
 			    											sort_arrow(sortKey=${searchRequest.getSortKey()},
 			    											sortOrder=${searchRequest.getSortOrder()},
-			    											fieldName='onTable')}">
+			    											fieldName='onTable')}"/>
 			    									</h4>
 			    								</div>
 		    								</th>
@@ -91,7 +91,7 @@
 			    										<th:block th:replace="~{snapadmin/fragments/table_selectable :: 
 			    											sort_arrow(sortKey=${searchRequest.getSortKey()},
 			    											sortOrder=${searchRequest.getSortOrder()},
-			    											fieldName='primaryKey')}">
+			    											fieldName='primaryKey')}"/>
 			    									</h4>
 			    								</div>
 		    								</th>
@@ -102,7 +102,7 @@
 			    										<th:block th:replace="~{snapadmin/fragments/table_selectable :: 
 			    											sort_arrow(sortKey=${searchRequest.getSortKey()},
 			    											sortOrder=${searchRequest.getSortOrder()},
-			    											fieldName='createdAt')}">
+			    											fieldName='createdAt')}"/>
 			    									</h4>
 			    								</div>
 		    								</th>
@@ -113,7 +113,7 @@
 			    										<th:block th:replace="~{snapadmin/fragments/table_selectable :: 
 			    											sort_arrow(sortKey=${searchRequest.getSortKey()},
 			    											sortOrder=${searchRequest.getSortOrder()},
-			    											fieldName='username')}">
+			    											fieldName='username')}"/>
 			    									</h4>
 			    								</div>
 		    								</th>

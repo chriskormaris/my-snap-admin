@@ -1,29 +1,11 @@
-/* 
+/*
  * SnapAdmin - An automatically generated CRUD admin UI for Spring Boot apps
  * Copyright (C) 2023 Ailef (http://ailef.tech)
- * 
+ *
  */
 
 
 package tech.ailef.snapadmin.external;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
@@ -38,6 +20,15 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import tech.ailef.snapadmin.external.annotations.Disable;
 import tech.ailef.snapadmin.external.annotations.DisplayFormat;
 import tech.ailef.snapadmin.external.dbmapping.CustomJpaRepository;
@@ -53,82 +44,99 @@ import tech.ailef.snapadmin.external.exceptions.SnapAdminNotFoundException;
 import tech.ailef.snapadmin.external.exceptions.UnsupportedFieldTypeException;
 import tech.ailef.snapadmin.external.misc.Utils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 /**
  * The main SnapAdmin class is responsible for the initialization phase. This class scans
  * the user provided package containing the {@code Entity} definitions and tries to map each
  * entity to a {@link DbObjectSchema} instance.
- * 
- * This process involves determining the correct type for each class field and its 
+ *
+ * This process involves determining the correct type for each class field and its
  * configuration at the database level. An exception will be thrown if it's not possible
  * to determine the field type.
  */
 @Component
 public class SnapAdmin {
 	private static final Logger logger = LoggerFactory.getLogger(SnapAdmin.class.getName());
-	
+
 	private EntityManager entityManager;
-	
+
 	private List<DbObjectSchema> schemas = new ArrayList<>();
-	
+
 	private List<String> modelsPackage;
-	
+
 	private SnapAdminProperties properties;
-	
-	private boolean authenticated;
-	
-	private static final String VERSION = "0.2.0";
-    
+
+    private boolean authenticated;
+
+    private HttpSession httpSession;
+
+    private static final String VERSION = "1.0.0";
+
     /**
 	 * Builds the SnapAdmin instance by scanning the `@Entity` beans and loading
 	 * the schemas.
 	 * @param entityManager	the entity manager
 	 * @param properties	the configuration properties
 	 */
-	public SnapAdmin(@Autowired EntityManager entityManager, @Autowired SnapAdminProperties properties) {
+	public SnapAdmin(
+            @Autowired EntityManager entityManager,
+            @Autowired SnapAdminProperties properties,
+            @Autowired HttpSession httpSession
+    ) {
 		this.modelsPackage = Arrays.stream(properties.getModelsPackage().split(",")).map(String::trim).toList();
 		this.entityManager = entityManager;
 		this.properties = properties;
+		this.httpSession = httpSession;
 	}
-	
+
 	@PostConstruct
 	private void init() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
-		
+
 		logger.debug("Initializing SnapAdmin...");
-		
+
 		for (String currentPackage : modelsPackage) {
 			logger.debug("Scanning package " + currentPackage);
-			
+
 			Set<BeanDefinition> beanDefs = provider.findCandidateComponents(currentPackage);
 			logger.debug("Found " + beanDefs.size() + " candidate @Entity classes");
-			
+
 			for (BeanDefinition bd : beanDefs) {
 				// This can return null if the Entity has the @Disable annotation
 				DbObjectSchema schema = processBeanDefinition(bd);
 				if (schema != null)
 					schemas.add(schema);
 			}
-			
+
 			logger.info("Scanned package '" + currentPackage + "'. Loaded " + beanDefs.size() + " schemas.");
 		}
 
 		boolean hasErrors = schemas.stream().flatMap(s -> s.getErrors().stream()).count() > 0;
-		
-		logger.info("SnapAdmin initialized. Loaded " + schemas.size() 
+
+		logger.info("SnapAdmin initialized. Loaded " + schemas.size()
 				+ " schemas from " + modelsPackage.size() + " packages"	+ (hasErrors ? " (with errors)" : ""));
 		logger.info("SnapAdmin web interface at: http://YOUR_HOST:YOUR_PORT/" + properties.getBaseUrl());
-		
+
 	}
 
 	/**
-	 * Returns the current version 
+	 * Returns the current version
 	 * @return
 	 */
 	public String getVersion() {
 		return VERSION;
 	}
-	
+
 	/**
 	 * Returns all the loaded schemas (i.e. entity classes)
 	 * @return the list of loaded schemas from the `@Entity` classes
@@ -136,7 +144,7 @@ public class SnapAdmin {
 	public List<DbObjectSchema> getSchemas() {
 		return Collections.unmodifiableList(schemas);
 	}
-	
+
 	/**
 	 * Finds a schema by its full class name
 	 * @param className	qualified class name
@@ -145,10 +153,10 @@ public class SnapAdmin {
 	 */
 	public DbObjectSchema findSchemaByClassName(String className) {
 		return schemas.stream().filter(s -> s.getClassName().equals(className)).findFirst().orElseThrow(() -> {
-			return new SnapAdminNotFoundException("Schema " + className + " not found.");
+			return new SnapAdminNotFoundException("Το σχήμα " + className + " δεν βρέθηκε.");
 		});
 	}
-	
+
 	/**
 	 * Finds a schema by its table name
 	 * @param tableName the table name on the database
@@ -157,10 +165,10 @@ public class SnapAdmin {
 	 */
 	public DbObjectSchema findSchemaByTableName(String tableName) {
 		return schemas.stream().filter(s -> s.getTableName().equals(tableName)).findFirst().orElseThrow(() -> {
-			return new SnapAdminException("Schema " + tableName + " not found.");
+			return new SnapAdminException("Το σχήμα " + tableName + " δεν βρέθηκε.");
 		});
 	}
-	
+
 	/**
 	 * Finds a schema by its class object
 	 * @param klass the `@Entity` class you want to find the schema for
@@ -175,35 +183,35 @@ public class SnapAdmin {
 	 * Returns whether this class is managed by SnapAdmin
 	 */
 	public boolean isManagedClass(Class<?> klass) {
-		Optional<DbObjectSchema> hasSchema = 
+		Optional<DbObjectSchema> hasSchema =
 			schemas.stream().filter(s -> s.getClassName().equals(klass.getName())).findFirst();
 		return hasSchema.isPresent();
 	}
-	
+
 	/**
 	 * This method processes a BeanDefinition into a DbObjectSchema object,
 	 * where all fields have been correctly mapped to DbField objects.
-	 * 
+	 *
 	 * If any field is not mappable, the method will throw an exception.
 	 * @param bd
 	 * @return a schema derived from the `@Entity` class
 	 */
 	private DbObjectSchema processBeanDefinition(BeanDefinition bd) {
 		String fullClassName = bd.getBeanClassName();
-		
+
 		try {
 			Class<?> klass = Class.forName(fullClassName);
-			
+
 			Disable disabled = klass.getAnnotation(Disable.class);
 			if (disabled != null)
 				return null;
-			
+
 			DbObjectSchema schema = new DbObjectSchema(klass, this);
 			CustomJpaRepository simpleJpaRepository = new CustomJpaRepository(schema, entityManager);
 			schema.setJpaRepository(simpleJpaRepository);
-			
+
 			logger.debug("Processing class: "  + klass + " - Table: " + schema.getTableName());
-			
+
 			Field[] fields = klass.getDeclaredFields();
 			for (Field f : fields) {
 				try {
@@ -211,7 +219,7 @@ public class SnapAdmin {
 					field.setSchema(schema);
 					schema.addField(field);
 				} catch (UnsupportedFieldTypeException e) {
-					logger.warn("The class " + klass.getSimpleName()  + " contains the field `" 
+					logger.warn("The class " + klass.getSimpleName()  + " contains the field `"
 								+ f.getName() + "` of type `" + f.getType().getSimpleName() + "`, which is not supported");
 					schema.addError(
 						new MappingError(
@@ -220,16 +228,16 @@ public class SnapAdmin {
 					);
 				}
 			}
-			
+
 			logger.debug("Processed " + klass + ", extracted " + schema.getSortedFields().size() + " fields");
-			
+
 			return schema;
 		} catch (ClassNotFoundException |
 				IllegalArgumentException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * Determines the name for the given field, by transforming it to snake_case
 	 * and checking if the `@Column` annotation is present.
@@ -239,37 +247,41 @@ public class SnapAdmin {
 	private String determineFieldName(Field f) {
 		Column[] columnAnnotations = f.getAnnotationsByType(Column.class);
 		String fieldName = Utils.camelToSnake(f.getName());
-		
+
 		if (columnAnnotations.length != 0) {
 			Column col = columnAnnotations[0];
 			if (col.name() != null && !col.name().isBlank())
 				fieldName = col.name();
 		}
-		
+
 		return fieldName;
 	}
-	
+
 	/**
-	 * Determines if a field is nullable from the `@Column` annotation
+	 * Determines if a field is nullable from the `@Column` or `@JoinColumn` annotation
 	 * @param f
 	 * @return
 	 */
 	private boolean determineNullable(Field f) {
 		Column[] columnAnnotations = f.getAnnotationsByType(Column.class);
-
-		boolean nullable = true;
 		if (columnAnnotations.length != 0) {
 			Column col = columnAnnotations[0];
-			nullable = col.nullable();
+			return col.nullable();
 		}
-		
-		return nullable;
+
+		JoinColumn[] joinColumnAnnotations = f.getAnnotationsByType(JoinColumn.class);
+		if (joinColumnAnnotations.length != 0) {
+			JoinColumn joinCol = joinColumnAnnotations[0];
+			return joinCol.nullable();
+		}
+
+		return true;
 	}
-	
+
 	/**
 	 * Builds a DbField object from a primitive Java field. This process involves
 	 * determining the correct field name on the database, its type and additional
-	 * attributes (e.g. nullable). 
+	 * attributes (e.g. nullable).
 	 * This method returns null if a field cannot be mapped to a supported type.
 	 * @param f primitive Java field to construct a DbField from
 	 * @param schema the schema this field belongs to
@@ -282,22 +294,22 @@ public class SnapAdmin {
 		ManyToOne manyToOne = f.getAnnotation(ManyToOne.class);
 		OneToOne oneToOne = f.getAnnotation(OneToOne.class);
 		Lob lob = f.getAnnotation(Lob.class);
-		
+
 		String fieldName = determineFieldName(f);
-		
+
 		// This will contain the type of the entity linked by the
 		// foreign key, if any
 		Class<?> connectedType = null;
-		
+
 		// Try to assign default field type determining it by the raw field type and its annotations
 		DbFieldType fieldType = null;
 		try {
 			Class<? extends DbFieldType> fieldTypeClass = DbFieldType.fromClass(f.getType());
-			
+
 			if (fieldTypeClass == StringFieldType.class && lob != null) {
 				fieldTypeClass = TextFieldType.class;
 			}
-			
+
 			// Enums are instantiated later because they call a different constructor
 			if (fieldTypeClass != EnumFieldType.class) {
 				try {
@@ -316,52 +328,52 @@ public class SnapAdmin {
 			fieldType = mapForeignKeyType(f.getType());
 			connectedType = f.getType();
 		}
-		
+
 		if (manyToMany != null || oneToMany != null) {
 			ParameterizedType stringListType = (ParameterizedType) f.getGenericType();
 	        Class<?> targetEntityClass = (Class<?>) stringListType.getActualTypeArguments()[0];
 	        fieldType = mapForeignKeyType(targetEntityClass);
 	        connectedType = targetEntityClass;
 		}
-		
+
 		// Check if field has @Enumerated annotation and process accordingly
 		if (fieldType == null) {
 			Enumerated enumerated = f.getAnnotation(Enumerated.class);
 			if (enumerated != null) {
 				EnumType type = enumerated.value();
-				
+
 				fieldType = new EnumFieldType(f.getType(), type);
 			}
 		}
-		
+
 		if (fieldType == null) {
 			throw new UnsupportedFieldTypeException("Unable to determine fieldType for " + f.getType());
 		}
-		
+
 		DisplayFormat displayFormat = f.getAnnotation(DisplayFormat.class);
-		
+
 		DbField field = new DbField(f.getName(), fieldName, f, fieldType, schema, displayFormat != null ? displayFormat.format() : null);
 		field.setConnectedType(connectedType);
-		
+
 		Id[] idAnnotations = f.getAnnotationsByType(Id.class);
 		field.setPrimaryKey(idAnnotations.length != 0);
-		
+
 		field.setNullable(determineNullable(f));
-		
+
 		if (field.isPrimaryKey())
 			field.setNullable(false);
-		
+
 		return field;
 	}
-	
+
 	/**
-	 * Returns the join column name for the relationship defined on 
+	 * Returns the join column name for the relationship defined on
 	 * the input Field object.
 	 * @param f
 	 * @return
 	 */
 	private String mapRelationshipJoinColumn(Field f) {
-		String joinColumnName = Utils.camelToSnake(f.getName()) + "_id"; 
+		String joinColumnName = Utils.camelToSnake(f.getName()) + "_id";
 		JoinColumn[] joinColumn = f.getAnnotationsByType(JoinColumn.class);
 		if (joinColumn.length != 0) {
 			joinColumnName = joinColumn[0].name();
@@ -369,11 +381,11 @@ public class SnapAdmin {
 		return joinColumnName;
 
 	}
-	
+
 	/**
 	 * Returns the type of a foreign key field, by looking at the type
 	 * of the primary key (defined as `@Id`) in the referenced table.
-	 * 
+	 *
 	 * @param entityClass
 	 * @return
 	 */
@@ -381,16 +393,16 @@ public class SnapAdmin {
 		try {
 			Object linkedEntity = entityClass.getConstructor().newInstance();
 			Class<?> linkType = null;
-			
+
 			for (Field ef : linkedEntity.getClass().getDeclaredFields()) {
 				if (ef.getAnnotationsByType(Id.class).length != 0) {
 					linkType = ef.getType();
 				}
 			}
-			
+
 			if (linkType == null)
 				throw new SnapAdminException("Unable to find @Id field in Entity class " + entityClass);
-			
+
 			return DbFieldType.fromClass(linkType).getConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
@@ -398,12 +410,29 @@ public class SnapAdmin {
 		}
 	}
 
-	public boolean isAuthenticated() {
-		return authenticated;
-	}
-	
-	public void setAuthenticated(boolean authenticated) {
-		this.authenticated = authenticated;
-	}
+    public boolean isAuthenticated() {
+        return authenticated;
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
+    }
+
+    public boolean isLoggedIn() {
+        return httpSession.getAttribute("logged_in") != null && Boolean.parseBoolean(httpSession.getAttribute("logged_in").toString())
+                && SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
+    }
+
+    public void setLoggedIn(boolean loggedIn) {
+        httpSession.setAttribute("logged_in", loggedIn);
+    }
+
+    public String getFullName() {
+        return httpSession.getAttribute("full_name") != null ? httpSession.getAttribute("full_name").toString() : null;
+    }
+
+    public void setFullName(String fullName) {
+        httpSession.setAttribute("full_name", fullName);
+    }
 
 }

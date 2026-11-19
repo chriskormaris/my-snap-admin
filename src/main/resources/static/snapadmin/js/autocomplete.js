@@ -1,4 +1,4 @@
-/* Request to the autocomplete REST endpoit */
+/* Request to the autocomplete REST endpoint */
 async function getSuggestions(className, query) {
 	const response = await fetch(`/${baseUrl}/api/autocomplete/${className}?query=${query}`);
 	const suggestions = await response.json();
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			showSuggestions(input);
 		});
 		
-		input.parentElement.querySelector("div.suggestions").innerHTML = 
+		input.parentElement.querySelector("div.suggestions").innerHTML =
 			`<div class="suggestion p-2 m-0">Enter a valid ID or start typing for suggestions</div>`;
 		
 		input.addEventListener('keyup', async function(e) {
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			input.parentElement.querySelector("div.suggestions").innerHTML = "";
 			
 			if (e.target.value.length <= 0) {
-				input.parentElement.querySelector("div.suggestions").innerHTML = 
+				input.parentElement.querySelector("div.suggestions").innerHTML =
 					`<div class="suggestion p-2 m-0">Enter a valid ID or start typing for suggestions</div>`;
 				return;
 			}

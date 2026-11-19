@@ -1,8 +1,17 @@
 [![javadoc](https://javadoc.io/badge2/tech.ailef/snap-admin/javadoc.svg)](https://javadoc.io/doc/tech.ailef/snap-admin) 
 
-> The project has been recently renamed from 'Spring Boot Database Admin' to 'SnapAdmin'.
+> The original project has been recently renamed from 'Spring Boot Database Admin' to 'SnapAdmin'.
 > If you were already using 'Spring Boot Database Admin' make sure to update your `pom.xml` and other
 > references with the new updated name.
+
+### my-snap-admin forked repository changelog
+
+> This project is a fork of [SnapAdmin](https://github.com/aileftech/snap-admin), with the addition of several bugs fixes.
+> Bug fixes include refactoring the external data source so that it can be easily configured from the application properties.
+> Several JavaScript related bug fixes have been included.
+> "Expand/Collapse sidebar menu" and "Show/Hide filters" buttons have been added in the interface.
+> Additional features included are Spring Security and LDAP-based authentication.
+> Finally, there's a branch with full translation of the interface into Greek.
 
 # SnapAdmin - Spring Boot Database Admin Panel
 
@@ -11,7 +20,7 @@ Generate a powerful database/CRUD management dashboard for your [Spring Boot®](
 SnapAdmin scans your `@Entity` classes and automatically builds a web UI with CRUD operations (and much more)
 for your database schema. No modifications required to your existing code (well, you will need to add **1 line** to it...)!
 
-[![Example page listing products](https://www.snapadmin.dev/img/screenshot.png)](https://www.snapadmin.dev/img/screenshot.png)
+[![Example page listing customers](screenshots/1.png)](screenshots/1.png)
 
 **Features:**
 

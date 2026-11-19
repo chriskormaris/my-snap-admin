@@ -133,7 +133,7 @@
 		</div>
 	</th:block>
 	<th:block th:if="${field.isBinary()}"  th:fragment="file(field, create, name, value)" >
-		<!--/*--> Edit options <!--*/-->
+		<!--/*--> Επιλογές επεξεργασίας <!--*/-->
 		<div th:if="${!create && object.get(field).getValue() != null}">
 			<input type="checkbox"
 				class="binary-field-checkbox"
@@ -142,16 +142,16 @@
 				checked
 				th:classAppend="|${(field.isPrimaryKey() && object != null) ||
 					 	(field.isReadOnly() && !create) ? 'disable' : ''}|"
-
+		
 				th:name="|__keep_${name}|">
-				<span>Keep current data</span>
+				<span>Κρατήστε τα τρέχοντα δεδομένα</span>
 			<div th:if="${field.isImage()}" class="mb-2">
 				<img class="thumb-image"
 					th:id="|__thumb_${name}|"
 					th:src="|/${snapadmin_baseUrl}/download/${schema.getClassName()}/${field.getJavaName()}/${object.getPrimaryKeyValue()}/image|">
 			</div>
 		</div>
-		<!--/*--> File input <!--*/-->
+		<!--/*--> Εισαγωγή αρχείου <!--*/-->
 		<input
 			th:if="${field.isBinary()}" placeholder="NULL" type="file" 
 			th:name="${name}" 

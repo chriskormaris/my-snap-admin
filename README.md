@@ -20,7 +20,7 @@ Generate a powerful database/CRUD management dashboard for your [Spring Boot®](
 SnapAdmin scans your `@Entity` classes and automatically builds a web UI with CRUD operations (and much more)
 for your database schema. No modifications required to your existing code (well, you will need to add **1 line** to it...)!
 
-[![Example page listing customers](screenshots/1.png)](screenshots/1.png)
+[![Example page listing customers](screenshots/greek.png)](screenshots/greek.png)
 
 **Features:**
 

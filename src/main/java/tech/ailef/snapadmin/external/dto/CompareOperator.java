@@ -1,7 +1,7 @@
-/*
+/* 
  * SnapAdmin - An automatically generated CRUD admin UI for Spring Boot apps
  * Copyright (C) 2023 Ailef (http://ailef.tech)
- *
+ * 
 
  */
 
@@ -16,48 +16,48 @@ public enum CompareOperator {
 	GT {
 		@Override
 		public String getDisplayName() {
-			return "Greater than";
+			return "Μεγαλύτερο από";
 		}
 	},
 	LT {
 		@Override
 		public String getDisplayName() {
-			return "Less than";
+			return "Μικρότερο από";
 		}
 	},
 	EQ {
 		@Override
 		public String getDisplayName() {
-			return "Equals";
+			return "Ίσον";
 		}
 	},
 	STRING_EQ {
 		@Override
 		public String getDisplayName() {
-			return "Equals";
+			return "Ίσον";
 		}
 	},
 	BEFORE {
 		@Override
 		public String getDisplayName() {
-			return "Before";
+			return "Πριν";
 		}
 	},
 	AFTER {
 		@Override
 		public String getDisplayName() {
-			return "After";
+			return "Μετά";
 		}
 	},
 	CONTAINS {
 		@Override
 		public String getDisplayName() {
-			return "Contains";
+			return "Περιέχει";
 		}
 	};
-
+	
 	public abstract String getDisplayName();
-
+	
 	public String toString() {
 		return this.name().toLowerCase();
 	}
